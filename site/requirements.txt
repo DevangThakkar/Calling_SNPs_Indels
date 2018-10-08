@@ -1,2 +1,0 @@
-Django==1.11.4
-django-widget-tweaks==1.4.1
