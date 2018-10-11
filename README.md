@@ -6,7 +6,7 @@ The repository here contains the code written for the assignment. The python scr
 Requirements: SRA Toolkit, BWA, Samtools, the whole sacCer3 genome in FASTA format, Django
 
 Key files:
- - [script_cbb520.py](https://github.com/DevangThakkar/Calling_SNPs_Indels/blob/master/script_cbb50.py): Contains all the actual code including shell commands
+ - [script_cbb520.py](https://github.com/DevangThakkar/Calling_SNPs_Indels/blob/master/script_cbb520.py): Contains all the actual code including shell commands
  - [wg.fa](https://github.com/DevangThakkar/Calling_SNPs_Indels/blob/master/wg.fa): Reference genome for sacCer3
  - [site/manage.py](https://github.com/DevangThakkar/Calling_SNPs_Indels/blob/master/site/manage.py): Settings for Django
  - [site/mysite/forms.py](https://github.com/DevangThakkar/Calling_SNPs_Indels/blob/master/site/mysite/forms.py): Logic behind the visual interface, calls functions from script_cbb520
