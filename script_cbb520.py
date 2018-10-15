@@ -17,8 +17,12 @@ def bash(cmd, run_desc):
 		the description to be printed while command is running
 	'''
 
-	return_str += (run_desc+'\n')
-	subprocess.call(cmd, shell=True, executable='/bin/bash')
+	if run_desc != '':
+		return_str += (run_desc+'\n')
+	try:
+		subprocess.call(cmd, shell=True, executable='/bin/bash')
+	except IOError:
+		return('Some file is missing, download the data again')
 	return (return_str)
 
 
@@ -121,6 +125,11 @@ def count_high_qual(name, len_threshold, qual_threshold):
 
 	# open file
 	fname = '/home/vcm/' + name + '.fastq'
+
+	# check if final data is present
+	fname0 = '/home/vcm/' + name + '-var-final.vcf'
+	if not os.path.exists(fname0):
+		return('Some file is missing, download the data again')
 	with open(fname, 'r') as f:
 		for line in f:
 
@@ -164,6 +173,8 @@ def fill_bins(name):
 	bin_x_counts = dict()
 	max_chr_pos = dict()
 	fname = '/home/vcm/' + name + '-var-final.vcf'
+	if not os.path.exists(fname):
+		return('Some file is missing, download the data again')
 	with open(fname, 'r') as f:
 		for line in f:
 			if line[0] == '#':
@@ -198,17 +209,19 @@ def poisson(k, mean):
 	return(((math.exp(-mean))*(mean**k))/(1.0*math.factorial(k)))
 
 
-def sum_poisson(num):
+def sum_poisson(mean, num):
 	''' Call the poisson for all number upto the provided num
 
 	Parameters:
 	-----------
 	num: int
 		the number till which the poissons are to be calculated
+	mean: int
+		the mean of the poisson
 	'''
 	sum_poisson = 0
 	for i in range(num+1):
-		sum_poisson += poisson(i, num)
+		sum_poisson += poisson(i, mean)
 	return sum_poisson
 
 
@@ -243,6 +256,8 @@ def calc_snp_types(name, print_num=False, print_type=False,
 	bin_snp_counts = fill_bins(name)
 
 	fname = '/home/vcm/' + name + '-var-final.vcf'
+	if not os.path.exists(fname):
+		return('Some file is missing, download the data again')
 	with open(fname, 'r') as f:
 		for line in f:
 			if line[0] == '#':
@@ -284,10 +299,10 @@ def calc_snp_types(name, print_num=False, print_type=False,
 	if print_exp_obs:
 		mean = np.mean(bin_snp_counts.values())
 		std = np.std(bin_snp_counts.values())
-		expected_ge_4_devs = 1-sum_poisson(int(4*math.sqrt(mean)))
+		expected_ge_4_devs = 1-sum_poisson(mean, int(mean+4*math.sqrt(mean)))
 		return_str += '\nExpected number of windows with SNPs 4 sigma greater \
 			than mean is: ' + str(int(expected_ge_4_devs*len(bin_snp_counts))) + '\n'
-		obtained_ge_4_devs = [x for x in bin_snp_counts.values() if x > mean]
+		obtained_ge_4_devs = [x for x in bin_snp_counts.values() if x > mean+4*math.sqrt(mean)]
 		return_str += 'Obtained number of windows with SNPs 4 sigma greater than \
 			mean is: ' + str(len(obtained_ge_4_devs)) + '\n'
 
@@ -366,6 +381,8 @@ def calc_indel_types(name, print_num=False, print_type=False,
 	bin_indel_counts = fill_bins(name)
 
 	fname = '/home/vcm/' + name + '-var-final.vcf'
+	if not os.path.exists(fname):
+		return('Some file is missing, download the data again')
 	with open(fname, 'r') as f:
 		for line in f:
 			if line[0] == '#':
@@ -418,10 +435,10 @@ def calc_indel_types(name, print_num=False, print_type=False,
 	if print_exp_obs:
 		mean = np.mean(bin_indel_counts.values())
 		std = np.std(bin_indel_counts.values())
-		expected_ge_4_devs = 1-sum_poisson(int(4*math.sqrt(mean)))
+		expected_ge_4_devs = 1-sum_poisson(mean, int(mean+4*math.sqrt(mean)))
 		return_str += '\nExpected number of windows with Indels 4 sigma greater \
 			than mean is: ' + str(int(expected_ge_4_devs*len(bin_indel_counts))) + '\n'
-		obtained_ge_4_devs = [x for x in bin_indel_counts.values() if x > mean]
+		obtained_ge_4_devs = [x for x in bin_indel_counts.values() if x > mean+4*math.sqrt(mean)]
 		return_str += 'Obtained number of windows with Indels 4 sigma greater than \
 			mean is: ' + str(len(obtained_ge_4_devs)) + '\n'
 
